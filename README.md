@@ -1,6 +1,33 @@
 # Range Request Fetcher
 
-A JavaScript library for reliably fetching large files using chunked range requests, automatic retries, and progress tracking.
+A JavaScript library for reliably fetching large files using chunked range requests, automatic retries, and progress tracking. Specifically designed to handle common network errors like `ERR_HTTP2_PROTOCOL_ERROR` and `ERR_SSL_PROTOCOL_ERROR` that frequently occur when downloading large files over unstable connections.
+
+## Troubleshooting download problems
+
+This library specifically handles common network errors that occur during large file downloads:
+
+### ERR_HTTP2_PROTOCOL_ERROR
+This error typically occurs when:
+- The HTTP/2 connection is disrupted or closed unexpectedly
+- The server terminates the stream prematurely
+- Network instability causes protocol-level issues
+
+**How range-request-fetcher helps:**
+- Automatically retries failed requests with exponential backoff
+- Resumes downloads from the last successful byte position
+
+### ERR_SSL_PROTOCOL_ERROR
+This error happens when:
+- SSL/TLS handshake fails or is interrupted
+- Certificate validation issues occur
+- Secure connection is dropped during transfer
+
+**How range-request-fetcher helps:**
+- Implements intelligent retry logic for SSL failures
+- Maintains connection state to resume from interruption points
+- Uses chunked requests to minimize data loss on connection drops
+
+These features make the library particularly reliable for downloading large files over unstable connections or from servers with intermittent issues
 
 ## Features
 
@@ -331,3 +358,4 @@ Contributions are welcome! Please:
 ## License
 
 MIT © César Duque Calle
+
