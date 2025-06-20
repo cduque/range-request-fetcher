@@ -2,7 +2,7 @@
 
 A JavaScript library for reliably fetching large files using chunked range requests, automatic retries, and progress tracking. Specifically designed to handle common network errors like `ERR_HTTP2_PROTOCOL_ERROR` and `ERR_SSL_PROTOCOL_ERROR` that frequently occur when downloading large files over unstable connections.
 
-## Troubleshooting download problems
+## Handling download problems
 
 This library specifically handles common network errors that occur during large file downloads:
 
