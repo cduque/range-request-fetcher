@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { reliableDownload } from '../index.js'
+import { rangeRequestFetcher } from '../index.js'
 
 describe('Integration Tests', () => {
   it('should handle a complete download workflow', async () => {
@@ -25,7 +25,7 @@ describe('Integration Tests', () => {
       })
     }
 
-    await reliableDownload({
+    await rangeRequestFetcher({
       url: 'https://example.com/large-file.zip',
       fileName: 'large-file.zip',
       token: 'auth-token',
@@ -77,7 +77,7 @@ describe('Integration Tests', () => {
       arrayBuffer: vi.fn().mockResolvedValue(new ArrayBuffer(chunkSize))
     })
 
-    await reliableDownload({
+    await rangeRequestFetcher({
       url: 'https://example.com/test-file.zip',
       fileName: 'test-file.zip',
       chunkSize,

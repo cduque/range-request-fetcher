@@ -1,10 +1,10 @@
-# Reliable Download
+# Range Request Fetcher
 
-A JavaScript library for reliably downloading large files using chunked range requests, automatic retries, and progress tracking.
+A JavaScript library for reliably fetching large files using chunked range requests, automatic retries, and progress tracking.
 
 ## Features
 
-- ✅ **Chunked downloads** - Splits large files into chunks for improved reliability
+- ✅ **Chunked fetching** - Splits large files into chunks for improved reliability
 - ✅ **Automatic retries** - Automatically retries failed chunks
 - ✅ **Progress tracking** - Real-time callbacks for progress updates
 - ✅ **Authentication support** - Compatible with Bearer tokens and custom headers
@@ -14,22 +14,22 @@ A JavaScript library for reliably downloading large files using chunked range re
 ## Installation
 
 ```bash
-npm install reliable-download
+npm install range-request-fetcher
 ```
 
 ## Basic Usage
 
 ```javascript
-import { reliableDownload } from 'reliable-download';
+import { rangeRequestFetcher } from 'range-request-fetcher';
 
-// Basic download
-await reliableDownload({
+// Basic fetch
+await rangeRequestFetcher({
   url: 'https://example.com/large-file.zip',
   fileName: 'my-download.zip'
 });
 
 // With progress tracking
-await reliableDownload({
+await rangeRequestFetcher({
   url: 'https://example.com/large-file.zip',
   fileName: 'my-download.zip',
   onProgress: (percent) => console.log(`Progress: ${percent}%`),
@@ -37,7 +37,7 @@ await reliableDownload({
 });
 
 // With authentication
-await reliableDownload({
+await rangeRequestFetcher({
   url: 'https://api.example.com/secure-file.zip',
   fileName: 'secure-file.zip',
   token: 'your-bearer-token',
@@ -49,7 +49,7 @@ await reliableDownload({
 
 ## API Reference
 
-### reliableDownload(options)
+### rangeRequestFetcher(options)
 
 Downloads a file using chunked range requests with automatic retries.
 
@@ -78,10 +78,10 @@ Downloads a file using chunked range requests with automatic retries.
 #### Advanced Example
 
 ```javascript
-import { reliableDownload } from 'reliable-download';
+import { rangeRequestFetcher } from 'range-request-fetcher';
 
 try {
-  await reliableDownload({
+  await rangeRequestFetcher({
     url: 'https://releases.ubuntu.com/22.04/ubuntu-22.04.3-desktop-amd64.iso',
     fileName: 'ubuntu-22.04.3-desktop-amd64.iso',
     chunkSize: 50 * 1024 * 1024, // 50MB chunks

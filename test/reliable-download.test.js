@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { reliableDownload } from '../index.js'
+import { rangeRequestFetcher } from '../index.js'
 import { mockWriter, mockFileHandle } from './setup.js'
 
-describe('reliableDownload', () => {
+describe('rangeRequestFetcher', () => {
   const mockUrl = 'https://ftp.rediris.es/mirror/ubuntu-releases/24.04.2/ubuntu-24.04.2-live-server-amd64.iso'
   const mockFileName = 'ubuntu-24.04.2-live-server-amd64.iso'
   
@@ -28,7 +28,7 @@ describe('reliableDownload', () => {
         arrayBuffer: vi.fn().mockResolvedValue(mockFileContent)
       })
 
-      await reliableDownload({
+      await rangeRequestFetcher({
         url: mockUrl,
         fileName: mockFileName,
         onProgress,
@@ -65,7 +65,7 @@ describe('reliableDownload', () => {
         arrayBuffer: vi.fn().mockResolvedValue(mockFileContent)
       })
 
-      await reliableDownload({
+      await rangeRequestFetcher({
         url: mockUrl,
         fileName: mockFileName,
         token: mockToken
@@ -96,7 +96,7 @@ describe('reliableDownload', () => {
         arrayBuffer: vi.fn().mockResolvedValue(mockFileContent)
       })
 
-      await reliableDownload({
+      await rangeRequestFetcher({
         url: mockUrl,
         fileName: mockFileName,
         headers: customHeaders
@@ -139,7 +139,7 @@ describe('reliableDownload', () => {
         arrayBuffer: vi.fn().mockResolvedValue(chunk3)
       })
 
-      await reliableDownload({
+      await rangeRequestFetcher({
         url: mockUrl,
         fileName: mockFileName,
         chunkSize,
@@ -189,7 +189,7 @@ describe('reliableDownload', () => {
         arrayBuffer: vi.fn().mockResolvedValue(mockFileContent)
       })
 
-      await reliableDownload({
+      await rangeRequestFetcher({
         url: mockUrl,
         fileName: mockFileName,
         maxRetries: 2,
@@ -210,7 +210,7 @@ describe('reliableDownload', () => {
 
       fetch.mockRejectedValue(new Error('Persistent network error'))
 
-      await expect(reliableDownload({
+      await expect(rangeRequestFetcher({
         url: mockUrl,
         fileName: mockFileName,
         maxRetries: 2,
@@ -226,7 +226,7 @@ describe('reliableDownload', () => {
         status: 404
       })
 
-      await expect(reliableDownload({
+      await expect(rangeRequestFetcher({
         url: mockUrl,
         fileName: mockFileName
       })).rejects.toThrow('Failed to get file info: 404')
@@ -238,7 +238,7 @@ describe('reliableDownload', () => {
         headers: { get: vi.fn().mockReturnValue(null) }
       })
 
-      await expect(reliableDownload({
+      await expect(rangeRequestFetcher({
         url: mockUrl,
         fileName: mockFileName
       })).rejects.toThrow('Could not determine file size')
@@ -255,7 +255,7 @@ describe('reliableDownload', () => {
         status: 416
       })
 
-      await expect(reliableDownload({
+      await expect(rangeRequestFetcher({
         url: mockUrl,
         fileName: mockFileName,
         maxRetries: 1
@@ -270,7 +270,7 @@ describe('reliableDownload', () => {
         headers: { get: vi.fn().mockReturnValue('0') }
       })
 
-      await expect(reliableDownload({
+      await expect(rangeRequestFetcher({
         url: mockUrl,
         fileName: mockFileName
       })).rejects.toThrow('Could not determine file size')
@@ -289,7 +289,7 @@ describe('reliableDownload', () => {
         arrayBuffer: vi.fn().mockResolvedValue(mockFileContent)
       })
 
-      await reliableDownload({
+      await rangeRequestFetcher({
         url: mockUrl
       })
 
@@ -311,7 +311,7 @@ describe('reliableDownload', () => {
         arrayBuffer: vi.fn().mockResolvedValue(mockFileContent)
       })
 
-      await reliableDownload({
+      await rangeRequestFetcher({
         url: mockUrl,
         fileName: mockFileName,
         chunkSize: 1000
@@ -341,7 +341,7 @@ describe('reliableDownload', () => {
         arrayBuffer: vi.fn().mockResolvedValue(chunk2)
       })
 
-      await reliableDownload({
+      await rangeRequestFetcher({
         url: mockUrl,
         fileName: mockFileName,
         chunkSize: 512
@@ -361,7 +361,7 @@ describe('reliableDownload', () => {
       fetch.mockRejectedValue(new Error('Write error'))
 
       try {
-        await reliableDownload({
+        await rangeRequestFetcher({
           url: mockUrl,
           fileName: mockFileName,
           maxRetries: 1

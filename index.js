@@ -1,4 +1,4 @@
-export async function reliableDownload({
+export async function rangeRequestFetcher({
   url,
   fileName = 'downloaded-file',
   token,
@@ -78,10 +78,13 @@ export async function reliableDownload({
     onStatus('done')
   } catch (err) {
     onStatus('error')
-    if (writer) try { 
+        if (writer) try { 
       await writer.close() 
     } catch {}
-    console.error('Download failed:', err)
+    console.error('Fetch failed:', err)
     throw err
   }
 }
+
+// Alias for backward compatibility
+export const reliableDownload = rangeRequestFetcher

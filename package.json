@@ -1,7 +1,7 @@
 {
-  "name": "reliable-download",
+  "name": "range-request-fetcher",
   "version": "1.0.0",
-  "description": "Reliable file downloader especially for big files with chunked range requests, retries, and progress tracking",
+  "description": "Reliable file fetcher especially for big files with chunked range requests, retries, and progress tracking",
   "main": "./index.js",
   "exports": {
     "import": "./index.js"
@@ -9,11 +9,11 @@
   "type": "module",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/cduque/reliable-download.git"
+    "url": "git+https://github.com/cduque/range-request-fetcher.git"
   },
-  "homepage": "https://github.com/cduque/reliable-download#readme",
+  "homepage": "https://github.com/cduque/range-request-fetcher#readme",
   "bugs": {
-    "url": "https://github.com/cduque/reliable-download/issues"
+    "url": "https://github.com/cduque/range-request-fetcher/issues"
   },
   "scripts": {
     "test": "vitest",
@@ -22,12 +22,12 @@
     "test:ui": "vitest --ui"
   },
   "keywords": [
-    "download",
+    "fetch",
     "chunk",
     "range-request",
     "progress",
     "retry",
-    "fetch",
+    "file-fetcher",
     "ERR_HTTP2_PROTOCOL_ERROR",
     "ERR_SSL_PROTOCOL_ERROR"
   ],
