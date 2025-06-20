@@ -1,0 +1,47 @@
+{
+  "name": "reliable-download",
+  "version": "1.0.0",
+  "description": "Reliable file downloader especially for big files with chunked range requests, retries, and progress tracking",
+  "main": "./index.js",
+  "exports": {
+    "import": "./index.js"
+  },
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cduque/reliable-download.git"
+  },
+  "homepage": "https://github.com/cduque/reliable-download#readme",
+  "bugs": {
+    "url": "https://github.com/cduque/reliable-download/issues"
+  },
+  "scripts": {
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "test:coverage": "vitest --coverage",
+    "test:ui": "vitest --ui"
+  },
+  "keywords": [
+    "download",
+    "chunk",
+    "range-request",
+    "progress",
+    "retry",
+    "fetch",
+    "ERR_HTTP2_PROTOCOL_ERROR",
+    "ERR_SSL_PROTOCOL_ERROR"
+  ],
+  "author": "César Duque Calle",
+  "license": "MIT",
+  "devDependencies": {
+    "@vitest/coverage-v8": "^3.2.4",
+    "@vitest/ui": "^3.2.4",
+    "jsdom": "^24.1.0",
+    "vitest": "^3.2.4"
+  },
+  "files": [
+    "index.js",
+    "README.md",
+    "LICENSE"
+  ]
+}
