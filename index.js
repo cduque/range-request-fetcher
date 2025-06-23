@@ -14,6 +14,7 @@ export function rangeRequestFetcher({
   let isPaused = false
   let isAborted = false
   let currentController = null
+  let progressInterval = null
 
   const buildHeaders = (extra = {}) => {
     const h = { ...headers, ...extra }
@@ -21,12 +22,28 @@ export function rangeRequestFetcher({
     return h
   }
 
+  const updateProgress = () => {
+    if (totalSize > 0) onProgress(Math.floor((downloadedSize / totalSize) * 100))
+  }
+
+  const startProgressUpdates = () => {
+    if (progressInterval) clearInterval(progressInterval)
+    progressInterval = setInterval(() => {
+      if (!isPaused && !isAborted) updateProgress()
+    }, 1000)
+  }
+
+  const stopProgressUpdates = () => {
+    if (progressInterval) {
+      clearInterval(progressInterval)
+      progressInterval = null
+    }
+  }
+
   const waitWhilePaused = () => {
     return new Promise((resolve) => {
       const checkPause = () => {
-        if (isAborted) {
-          throw new Error('Download aborted')
-        }
+        if (isAborted) throw new Error('Download aborted')
         if (!isPaused) {
           resolve()
         } else {
@@ -46,15 +63,15 @@ export function rangeRequestFetcher({
         headers: buildHeaders()
       })
 
-      if (!headResponse.ok)
-        throw new Error(`Failed to get file info: ${headResponse.status}`)
+      if (!headResponse.ok) throw new Error(`Failed to get file info: ${headResponse.status}`)
 
       totalSize = parseInt(headResponse.headers.get('Content-Length')) || 0
-      if (!totalSize)
-        throw new Error('Could not determine file size')
+      if (!totalSize) throw new Error('Could not determine file size')
 
       const fileHandle = await window.showSaveFilePicker({ suggestedName: fileName })
       writer = await fileHandle.createWritable()
+
+      startProgressUpdates()
 
       while (downloadedSize < totalSize && !isAborted) {
         await waitWhilePaused()
@@ -84,8 +101,7 @@ export function rangeRequestFetcher({
               signal: currentController.signal
             })
 
-            if (!res.ok)
-              throw new Error(`Chunk fetch failed: ${res.status}`)
+            if (!res.ok) throw new Error(`Chunk fetch failed: ${res.status}`)
 
             const chunk = await res.arrayBuffer()
             
@@ -96,21 +112,18 @@ export function rangeRequestFetcher({
             await writer.write(chunk)
 
             downloadedSize += chunk.byteLength
-            onProgress(Math.floor((downloadedSize / totalSize) * 100))
+            updateProgress()
             onStatus(isPaused ? 'paused' : 'downloading')
             success = true
             currentController = null
           } catch (err) {
             currentController = null
             
-            if (err.name === 'AbortError' || isAborted) {
-              break
-            }
+            if (err.name === 'AbortError' || isAborted) break
             
             retries++
             onStatus(`retrying ${start}-${end}, attempt ${retries}`)
-            if (retries >= maxRetries)
-              throw new Error(`Chunk ${start}-${end} failed after ${maxRetries} retries: ${err.message}`)
+            if (retries >= maxRetries) throw new Error(`Chunk ${start}-${end} failed after ${maxRetries} retries: ${err.message}`)
             await new Promise(r => setTimeout(r, 1000 * retries))
           }
         }
@@ -119,29 +132,28 @@ export function rangeRequestFetcher({
       }
 
       if (isAborted) {
+        stopProgressUpdates()
         onStatus('aborted')
         throw new Error('Download aborted')
       }
 
+      stopProgressUpdates()
       onStatus('finalizing')
       await writer.close()
+      updateProgress()
       onStatus('done')
     } catch (err) {
-      if (!isAborted) {
-        onStatus('error')
-      }
+      stopProgressUpdates()
+      if (!isAborted) onStatus('error')
       if (writer) try { 
         await writer.close() 
       } catch {}
-      if (currentController) {
-        currentController.abort()
-      }
+      if (currentController) currentController.abort()
       console.error('Fetch failed:', err)
       throw err
     }
   })()
 
-  // Return control object
   return {
     promise: downloadPromise,
     pause: () => {
@@ -154,9 +166,8 @@ export function rangeRequestFetcher({
     },
     abort: () => {
       isAborted = true
-      if (currentController) {
-        currentController.abort()
-      }
+      stopProgressUpdates()
+      if (currentController) currentController.abort()
       onStatus('aborted')
     },
     isPaused: () => isPaused,
