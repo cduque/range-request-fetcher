@@ -1,7 +1,7 @@
 {
   "name": "range-request-fetcher",
-  "version": "1.0.0",
-  "description": "Reliable file fetcher especially for big files with chunked range requests, retries, and progress tracking",
+  "version": "2.0.0",
+  "description": "Reliable file fetcher with pause, resume, and abort controls for big files using chunked range requests, retries, and progress tracking",
   "main": "./index.js",
   "exports": {
     "import": "./index.js"
@@ -28,6 +28,10 @@
     "progress",
     "retry",
     "file-fetcher",
+    "pause",
+    "resume", 
+    "abort",
+    "download-control",
     "ERR_HTTP2_PROTOCOL_ERROR",
     "ERR_SSL_PROTOCOL_ERROR"
   ],
