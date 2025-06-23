@@ -10,6 +10,7 @@ export function rangeRequestFetcher({
 }) {
   let totalSize = 0
   let downloadedSize = 0
+  let currentChunkProgress = 0
   let writer
   let isPaused = false
   let isAborted = false
@@ -23,14 +24,17 @@ export function rangeRequestFetcher({
   }
 
   const updateProgress = () => {
-    if (totalSize > 0) onProgress(Math.floor((downloadedSize / totalSize) * 100))
+    if (totalSize > 0) {
+      const totalProgress = downloadedSize + currentChunkProgress
+      onProgress(Math.floor((totalProgress / totalSize) * 100))
+    }
   }
 
   const startProgressUpdates = () => {
     if (progressInterval) clearInterval(progressInterval)
     progressInterval = setInterval(() => {
       if (!isPaused && !isAborted) updateProgress()
-    }, 1000)
+    }, 250) // More frequent updates (4 times per second)
   }
 
   const stopProgressUpdates = () => {
@@ -103,15 +107,51 @@ export function rangeRequestFetcher({
 
             if (!res.ok) throw new Error(`Chunk fetch failed: ${res.status}`)
 
-            const chunk = await res.arrayBuffer()
+            // Reset current chunk progress for this new chunk
+            currentChunkProgress = 0
+            const expectedChunkSize = end - start + 1
+            
+            // Stream the response for progressive updates
+            const reader = res.body.getReader()
+            const chunks = []
+            let receivedLength = 0
+
+            while (true) {
+              await waitWhilePaused()
+              if (isAborted) break
+
+              const { done, value } = await reader.read()
+              
+              if (done) break
+              
+              chunks.push(value)
+              receivedLength += value.length
+              
+              // Update current chunk progress for smooth progress updates
+              currentChunkProgress = receivedLength
+              updateProgress() // Call updateProgress for immediate updates during streaming
+              
+              if (isAborted) break
+            }
+
+            if (isAborted) break
+
+            // Combine all chunks into a single ArrayBuffer
+            const chunk = new Uint8Array(receivedLength)
+            let offset = 0
+            for (const chunkPart of chunks) {
+              chunk.set(chunkPart, offset)
+              offset += chunkPart.length
+            }
             
             await waitWhilePaused()
             
             if (isAborted) break
 
-            await writer.write(chunk)
+            await writer.write(chunk.buffer)
 
             downloadedSize += chunk.byteLength
+            currentChunkProgress = 0 // Reset since this chunk is now part of downloadedSize
             updateProgress()
             onStatus(isPaused ? 'paused' : 'downloading')
             success = true
@@ -172,6 +212,6 @@ export function rangeRequestFetcher({
     },
     isPaused: () => isPaused,
     isAborted: () => isAborted,
-    getProgress: () => totalSize > 0 ? Math.floor((downloadedSize / totalSize) * 100) : 0
+    getProgress: () => totalSize > 0 ? Math.floor(((downloadedSize + currentChunkProgress) / totalSize) * 100) : 0
   }
 }

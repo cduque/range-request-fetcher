@@ -1,6 +1,6 @@
 {
   "name": "range-request-fetcher",
-  "version": "2.1.0",
+  "version": "2.2.1",
   "description": "Reliable file fetcher with pause, resume, and abort controls for big files using chunked range requests, retries, and progress tracking",
   "main": "./index.js",
   "exports": {
