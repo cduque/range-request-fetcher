@@ -31,13 +31,13 @@ These features make the library particularly reliable for downloading large file
 
 ## Features
 
-- ✅ **Chunked fetching** - Splits large files into chunks for improved reliability
-- ✅ **Automatic retries** - Automatically retries failed chunks
-- ✅ **Progress tracking** - Real-time callbacks for progress updates
-- ✅ **Pause/Resume/Abort** - Full download control with pause, resume, and abort functionality
-- ✅ **Authentication support** - Compatible with Bearer tokens and custom headers
-- ✅ **Modern API** - Uses File System Access API for saving files
-- ✅ **Error handling** - Robust handling of network and protocol errors
+- **Chunked fetching** - Splits large files into chunks for improved reliability
+- **Automatic retries** - Automatically retries failed chunks
+- **Progress tracking** - Real-time callbacks for progress updates
+- **Pause/Resume/Abort** - Full download control with pause, resume, and abort functionality
+- **Authentication support** - Compatible with Bearer tokens and custom headers
+- **Modern API** - Uses File System Access API for saving files
+- **Error handling** - Robust handling of network and protocol errors
 
 ## Installation
 
@@ -283,21 +283,21 @@ const monitor = setInterval(() => {
 // Wait for completion
 try {
   await download.promise;
-  console.log('🎉 Download completed successfully!');
+  console.log('Download completed successfully!');
   clearInterval(monitor);
 } catch (error) {
   clearInterval(monitor);
   
   if (download.isAborted()) {
-    console.log('❌ Download was cancelled by user');
+    console.log('Download was cancelled by user');
   } else {
-    console.error('💥 Download failed:', error.message);
+    console.error('Download failed:', error.message);
     
     // Show user-friendly error messages
     if (error.message.includes('ERR_HTTP2_PROTOCOL_ERROR')) {
-      console.log('💡 Try again - HTTP/2 connection issue detected');
+      console.log('Try again - HTTP/2 connection issue detected');
     } else if (error.message.includes('ERR_SSL_PROTOCOL_ERROR')) {
-      console.log('💡 Try again - SSL connection issue detected');
+      console.log('Try again - SSL connection issue detected');
     }
   }
 }
