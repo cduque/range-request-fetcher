@@ -72,7 +72,15 @@ export function rangeRequestFetcher({
       totalSize = parseInt(headResponse.headers.get('Content-Length')) || 0
       if (!totalSize) throw new Error('Could not determine file size')
 
-      const fileHandle = await window.showSaveFilePicker({ suggestedName: fileName })
+      // Extract filename from Content-Disposition header if available
+      let suggestedFileName = fileName
+      const contentDisposition = headResponse.headers.get('Content-Disposition')
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/)
+        if (filenameMatch && filenameMatch[1]) suggestedFileName = filenameMatch[1].replace(/['"]/g, '')
+      }
+
+      const fileHandle = await window.showSaveFilePicker({ suggestedName: suggestedFileName })
       writer = await fileHandle.createWritable()
 
       startProgressUpdates()
