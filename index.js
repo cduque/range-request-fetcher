@@ -62,6 +62,11 @@ export function rangeRequestFetcher({
     try {
       onStatus('preparing')
 
+      // Open the save dialog immediately while the user gesture is still active,
+      // before the HEAD request which may take a long time (e.g. server builds a zip).
+      const fileHandle = await window.showSaveFilePicker({ suggestedName: fileName })
+      writer = await fileHandle.createWritable()
+
       const headResponse = await fetch(url, {
         method: 'HEAD',
         headers: buildHeaders()
@@ -71,17 +76,6 @@ export function rangeRequestFetcher({
 
       totalSize = parseInt(headResponse.headers.get('Content-Length')) || 0
       if (!totalSize) throw new Error('Could not determine file size')
-
-      // Extract filename from Content-Disposition header if available
-      let suggestedFileName = fileName
-      const contentDisposition = headResponse.headers.get('Content-Disposition')
-      if (contentDisposition) {
-        const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/)
-        if (filenameMatch && filenameMatch[1]) suggestedFileName = filenameMatch[1].replace(/['"]/g, '')
-      }
-
-      const fileHandle = await window.showSaveFilePicker({ suggestedName: suggestedFileName })
-      writer = await fileHandle.createWritable()
 
       startProgressUpdates()
 
@@ -117,8 +111,7 @@ export function rangeRequestFetcher({
 
             // Reset current chunk progress for this new chunk
             currentChunkProgress = 0
-            const expectedChunkSize = end - start + 1
-            
+
             // Stream the response for progressive updates
             const reader = res.body.getReader()
             const chunks = []
