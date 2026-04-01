@@ -1,6 +1,7 @@
 export function rangeRequestFetcher({
   url,
   fileName = 'downloaded-file',
+  earlyFilePicker = false,
   token,
   headers = {},
   chunkSize = 1024 * 1024 * 100,
@@ -62,10 +63,14 @@ export function rangeRequestFetcher({
     try {
       onStatus('preparing')
 
-      // Open the save dialog immediately while the user gesture is still active,
-      // before the HEAD request which may take a long time (e.g. server builds a zip).
-      const fileHandle = await window.showSaveFilePicker({ suggestedName: fileName })
-      writer = await fileHandle.createWritable()
+      let fileHandle
+
+      if (earlyFilePicker) {
+        // Show dialog before HEAD — required when the server takes long to respond
+        // (e.g. building a zip), which would expire the browser's user gesture window.
+        // Caller must supply fileName since Content-Disposition won't be available yet.
+        fileHandle = await window.showSaveFilePicker({ suggestedName: fileName })
+      }
 
       const headResponse = await fetch(url, {
         method: 'HEAD',
@@ -76,6 +81,19 @@ export function rangeRequestFetcher({
 
       totalSize = parseInt(headResponse.headers.get('Content-Length')) || 0
       if (!totalSize) throw new Error('Could not determine file size')
+
+      if (!earlyFilePicker) {
+        // Show dialog after HEAD so we can use the filename from Content-Disposition.
+        let suggestedFileName = fileName
+        const contentDisposition = headResponse.headers.get('Content-Disposition')
+        if (contentDisposition) {
+          const match = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/)
+          if (match?.[1]) suggestedFileName = match[1].replace(/['"]/g, '')
+        }
+        fileHandle = await window.showSaveFilePicker({ suggestedName: suggestedFileName })
+      }
+
+      writer = await fileHandle.createWritable()
 
       startProgressUpdates()
 
